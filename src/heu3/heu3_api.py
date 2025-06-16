@@ -4,7 +4,7 @@ class HEUv3:
     """
 
     def __init__(self) -> None:
-        print('You have created an HEUv3 class')
+        print('You have created an HEUv3 class.')
 
 
 if __name__ == '__main__':
