@@ -30,9 +30,8 @@ class HEUv3:
 
             try:
                 with self.lock:
-                    response = self.instrument.query(command)
+                    return self.instrument.query(command)
 
-                return response
             except Exception as e:
                 raise ConnectionError(f'Serial Communication Error: {e}')
 
