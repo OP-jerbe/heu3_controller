@@ -239,3 +239,95 @@ class HEUv3:
     ####################################################################################
     ############################### Read Commands ######################################
     ####################################################################################
+
+    def read_inlet_temp(self) -> Optional[str]:
+        """
+        Read the inlet temperature of the Galden HT-270.
+
+        Returns:
+            Optional[str]: Inlet temperature of Galden in °C
+        """
+        command = 'RINTE'
+        return self.send_query(command)
+
+    def read_outlet_temp(self) -> Optional[str]:
+        """
+        Read the outlet temperature of the Galden HT-270.
+
+        Returns:
+            Optional[str]: Outlet temperature of Galden in °C
+        """
+        command = 'ROUTT'
+        return self.send_query(command)
+
+    def read_flow_rate(self) -> Optional[str]:
+        """
+        Read the flow rate of the Galden in liters per minute.
+
+        Returns:
+            Optional[str]: Flow rate of Galden as measured by internal flow meter
+        """
+        command = 'RFLOW'
+        return self.send_query(command)
+
+    def read_interlock_status(self) -> Optional[str]:
+        """
+        Read the interlock status bit.
+
+        Returns:
+            Optional[str]: `"1"` for on, good, `"2"` for off
+        """
+        command = 'RINTR'
+        return self.send_query(command)
+
+    def read_pump_status(self) -> Optional[str]:
+        """
+        Read the status bits for the pumps.
+
+        Returns:
+            Optional[str]: `"0"` for bad, `"1"` for good, `"2"` for good but manually off
+        """
+        command = 'RPUMP'
+        return self.send_query(command)
+
+    def read_hour_meters(self) -> Optional[str]:
+        """
+        Read the number of hours the unit has been power on, and the number of hours each pump has been run.
+
+        Returns:
+            Optional[str]: unit-on hours, pump1 hours, pump2 hours in the form `"nnnnnn nnnnnn nnnnnn"`
+        """
+        command = 'RHOUR'
+        return self.send_query(command)
+
+    def read_power_dissipated(self) -> Optional[str]:
+        """
+        Read the current amount of heat being dissipated/exchanged in Watts calculated
+        from flow rate and inlet/outlet temperature difference. Only valid when
+        Galden HT-270 is the coolant.
+
+        Returns:
+            Optional[str]: the power exchanged in the unit
+        """
+        command = 'RPOWR'
+        return self.send_query(command)
+
+    def read_leak_detect(self) -> Optional[str]:
+        """
+        Read the leak detector bit.
+
+        Returns:
+            Optional[str]: `"0"` for no leak, `"1"` for leak
+        """
+        command = 'RLEAK'
+        return self.send_query(command)
+
+    def read_datetime(self) -> Optional[str]:
+        """
+        Read the real time clock used in logs.
+
+        Returns:
+            Optional[str]: the current month, day, year, hour:minute:second
+        """
+        command = 'RDATI'
+        return self.send_query(command)
