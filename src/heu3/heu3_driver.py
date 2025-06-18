@@ -44,10 +44,14 @@ class HEUv3:
     * !: Ping the heat exchange unit [`WAZOO!`]
     """
 
-    def __init__(self, resource_name: Optional[str]) -> None:
+    def __init__(
+        self,
+        resource_name: Optional[str] = None,
+        instrument: Optional[MessageBasedResource] = None,
+    ) -> None:
         self.rm = pyvisa.ResourceManager('@py')
-        self.instrument: Optional[MessageBasedResource] = None
-        if resource_name is not None:
+        self.instrument: Optional[MessageBasedResource] = instrument
+        if self.instrument is None and resource_name is not None:
             self.instrument = cast(
                 MessageBasedResource, self.rm.open_resource(resource_name)
             )
