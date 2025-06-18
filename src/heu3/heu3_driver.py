@@ -241,7 +241,7 @@ class HEUv3:
         return self.send_query(command)  # returns "{pump}\n"
 
     ####################################################################################
-    ############################### Read Commands ######################################
+    ############################ Read State Commands ###################################
     ####################################################################################
 
     def read_inlet_temp(self) -> Optional[str]:
@@ -334,4 +334,59 @@ class HEUv3:
             Optional[str]: the current month, day, year, hour:minute:second
         """
         command = 'RDATI'
+        return self.send_query(command)
+
+    def read_factory_info(self) -> Optional[str]:
+        """
+        Read the HEU build information
+
+        Returns:
+            Optional[str]: serial number, protocol version, number of boot-ups, hardware
+        version, software version, and compile date
+        """
+        command = 'RFINF'
+        return self.send_query(command)
+
+    ####################################################################################
+    ########################### Read Settings Commands #################################
+    ####################################################################################
+
+    def read_pump_speed_setting(self) -> Optional[str]:
+        """
+        Read the pump speed setting
+
+        Returns:
+            Optional[str]: pump speed setting
+        """
+        command = 'RPSPD'
+        return self.send_query(command)
+
+    def read_pump_IO_setting(self) -> Optional[str]:
+        """
+        Read the pumps On/Off switch state
+
+        Returns:
+            Optional[str]: state of On/Off switch (`"0"` for OFF, `"1"` for ON)
+        """
+        command = 'RONOF'
+        return self.send_query(command)
+
+    def read_max_temp_interlock_setting(self) -> Optional[str]:
+        """
+        Read the temperature interlock trip point setting.
+
+        Returns:
+            Optional[str]: the temperature interlock set point
+        """
+        command = 'RMAXT'
+        return self.send_query(command)
+
+    def read_min_flow_interlock_setting(self) -> Optional[str]:
+        """
+        Read the flow rate interlock trip point setting.
+
+        Returns:
+            Optional[str]: the flow rate interlock set point
+        """
+        command = 'RMINF'
         return self.send_query(command)
