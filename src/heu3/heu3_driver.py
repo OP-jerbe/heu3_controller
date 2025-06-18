@@ -57,7 +57,7 @@ class HEUv3:
             )
         self.lock = Lock()
 
-    def send_query(self, command: str) -> Optional[str]:
+    def send_query(self, command: str) -> str:
         """
         Send a command to the instrument and read the response.
 
@@ -65,68 +65,70 @@ class HEUv3:
             command (str): Command string to send to the HEUv3.
 
         Returns:
-            Optional[str]: Response from the instrument, or None.
+            str: Response from the instrument
         """
         if not self.instrument:
-            return
+            raise RuntimeError(
+                'Attempted to communicate with HEUv3, but no instrument is connected.'
+            )
 
         if not command.endswith('\n'):
             command += '\n'
 
+        with self.lock:
             try:
-                with self.lock:
-                    response = self.instrument.query(command)
-                    print(f'Command: "{command}"\nResponse: "{response}"')
-                    return response
-
+                response = self.instrument.query(command)
             except Exception as e:
                 raise ConnectionError(f'Serial Communication Error: {e}')
+
+            print(f'Command: "{command}"\nResponse: "{response}"')
+            return response
 
     ####################################################################################
     ################################ Set Commands ######################################
     ####################################################################################
 
-    def disable_echo(self) -> Optional[str]:
+    def disable_echo(self) -> str:
         """
         Disable echo.
 
         Returns:
-            Optional[str]: Command string with newline.
+            str: Command string with newline.
         """
         command = 'DE'
         return self.send_query(command)  # returns "DE\n"
 
-    def enable_echo(self) -> Optional[str]:
+    def enable_echo(self) -> str:
         """
         Enable echo (default state).
 
         Returns:
-            Optional[str]: Command string with newline.
+            str: Command string with newline.
         """
         command = 'EE'
         return self.send_query(command)  # returns "EE\n"
 
-    def enable_panel(self) -> Optional[str]:
+    def enable_panel(self) -> str:
         """
         Enable the touchscreen panel (default state).
 
         Returns:
-            Optional[str]: Command string with newline.
+            str: Command string with newline.
         """
         command = 'EP'
         return self.send_query(command)  # returns "EP\n"
 
-    def disable_panel(self) -> Optional[str]:
+    def disable_panel(self) -> str:
         """
         Disable the touchscreen panel (only pump on/off buttons work).
 
         Returns:
-            Optional[str]: Command string with newline.
+            str: Command string with newline.
         """
         command = 'DP'
         return self.send_query(command)  # returns "DP\n"
 
-    def set_pump_speed(self, set_point: int) -> Optional[str]:
+    def set_pump_speed(self, set_point: int) -> str:
         """
         Set the pump speed.
 
@@ -134,7 +136,7 @@ class HEUv3:
             set_point (int): Pump speed setting (0-999).
 
         Returns:
-            Optional[str]: Command string with newline.
+            str: Command string with newline.
 
         Raises:
             TypeError: If set_point is not an integer
@@ -154,27 +156,27 @@ class HEUv3:
         command = f'SPS{speed_str}'
         return self.send_query(command)  # returns "\n"
 
-    def enable_pumps(self) -> Optional[str]:
+    def enable_pumps(self) -> str:
         """
         Turn the pumps on.
 
         Returns:
-            Optional[str]: Command string with newline.
+            str: Command string with newline.
         """
         command = 'ON'
         return self.send_query(command)  # returns "\n"
 
-    def disable_pumps(self) -> Optional[str]:
+    def disable_pumps(self) -> str:
         """
         Turn the pumps off.
 
         Returns:
-            Optional[str]: Command string with newline.
+            str: Command string with newline.
         """
         command = 'OFF'
         return self.send_query(command)  # returns "\n"
 
-    def set_max_temp_interlock(self, set_point: int) -> Optional[str]:
+    def set_max_temp_interlock(self, set_point: int) -> str:
         """
         Set the maximum temperature for the interlock in °C.
 
@@ -182,7 +184,7 @@ class HEUv3:
             set_point (int): Maximum allowable temperature (5-65).
 
         Returns:
-            Optional[str]: Command string with newline.
+            str: Command string with newline.
 
         Raises:
             TypeError: If set_point is not an integer
@@ -202,7 +204,7 @@ class HEUv3:
         command = f'SMAXT{set_point_str}'
         return self.send_query(command)  # returns "\n"
 
-    def set_min_flow_interlock(self, set_point: int | float) -> Optional[str]:
+    def set_min_flow_interlock(self, set_point: int | float) -> str:
         """
         Set the minimum flow rate for the interlock in L/min.
 
@@ -210,7 +212,7 @@ class HEUv3:
             set_point (int | float): Minimum allowable flow rate (0.5-9.99).
 
         Returns:
-            Optional[str]: Command string with newline.
+            str: Command string with newline.
 
         Raises:
             ValueError: If the set point is outside valid range.
@@ -227,7 +229,7 @@ class HEUv3:
         command = f'SMINF{set_point_str}'
         return self.send_query(command)  # returns "\n"
 
-    def select_pumps(self, pump: int) -> Optional[str]:
+    def select_pumps(self, pump: int) -> str:
         """
         Select which pumps to activate.
 
@@ -235,7 +237,7 @@ class HEUv3:
             pump (int): 0 for both pumps, 1 for pump1, 2 for pump2.
 
         Returns:
-            Optional[str]: Command string with newline.
+            str: Command string with newline.
         """
         command = f'SPONO{pump}'
         return self.send_query(command)  # returns "{pump}\n"
@@ -244,104 +246,104 @@ class HEUv3:
     ############################ Read State Commands ###################################
     ####################################################################################
 
-    def read_inlet_temp(self) -> Optional[str]:
+    def read_inlet_temp(self) -> str:
         """
         Read the inlet temperature of the Galden HT-270.
 
         Returns:
-            Optional[str]: Inlet temperature of Galden in °C
+            str: Inlet temperature of Galden in °C
         """
         command = 'RINTE'
         return self.send_query(command)
 
-    def read_outlet_temp(self) -> Optional[str]:
+    def read_outlet_temp(self) -> str:
         """
         Read the outlet temperature of the Galden HT-270.
 
         Returns:
-            Optional[str]: Outlet temperature of Galden in °C
+            str: Outlet temperature of Galden in °C
         """
         command = 'ROUTT'
         return self.send_query(command)
 
-    def read_flow_rate(self) -> Optional[str]:
+    def read_flow_rate(self) -> str:
         """
         Read the flow rate of the Galden in liters per minute.
 
         Returns:
-            Optional[str]: Flow rate of Galden as measured by internal flow meter
+            str: Flow rate of Galden as measured by internal flow meter
         """
         command = 'RFLOW'
         return self.send_query(command)
 
-    def read_interlock_status(self) -> Optional[str]:
+    def read_interlock_status(self) -> str:
         """
         Read the interlock status bit.
 
         Returns:
-            Optional[str]: `"1"` for on, good, `"2"` for off
+            str: `"1"` for on, good, `"2"` for off
         """
         command = 'RINTR'
         return self.send_query(command)
 
-    def read_pump_status(self) -> Optional[str]:
+    def read_pump_status(self) -> str:
         """
         Read the status bits for the pumps.
 
         Returns:
-            Optional[str]: `"0"` for bad, `"1"` for good, `"2"` for good but manually off
+            str: `"0"` for bad, `"1"` for good, `"2"` for good but manually off
         """
         command = 'RPUMP'
         return self.send_query(command)
 
-    def read_hour_meters(self) -> Optional[str]:
+    def read_hour_meters(self) -> str:
         """
         Read the number of hours the unit has been power on, and the number of hours each pump has been run.
 
         Returns:
-            Optional[str]: unit-on hours, pump1 hours, pump2 hours in the form `"nnnnnn nnnnnn nnnnnn"`
+            str: unit-on hours, pump1 hours, pump2 hours in the form `"nnnnnn nnnnnn nnnnnn"`
         """
         command = 'RHOUR'
         return self.send_query(command)
 
-    def read_power_dissipated(self) -> Optional[str]:
+    def read_power_dissipated(self) -> str:
         """
         Read the current amount of heat being dissipated/exchanged in Watts calculated
         from flow rate and inlet/outlet temperature difference. Only valid when
         Galden HT-270 is the coolant.
 
         Returns:
-            Optional[str]: the power exchanged in the unit
+            str: the power exchanged in the unit
         """
         command = 'RPOWR'
         return self.send_query(command)
 
-    def read_leak_detect(self) -> Optional[str]:
+    def read_leak_detect(self) -> str:
         """
         Read the leak detector bit.
 
         Returns:
-            Optional[str]: `"0"` for no leak, `"1"` for leak
+            str: `"0"` for no leak, `"1"` for leak
         """
         command = 'RLEAK'
         return self.send_query(command)
 
-    def read_datetime(self) -> Optional[str]:
+    def read_datetime(self) -> str:
         """
         Read the real time clock used in logs.
 
         Returns:
-            Optional[str]: the current month, day, year, hour:minute:second
+            str: the current month, day, year, hour:minute:second
         """
         command = 'RDATI'
         return self.send_query(command)
 
-    def read_factory_info(self) -> Optional[str]:
+    def read_factory_info(self) -> str:
         """
         Read the HEU build information
 
         Returns:
-            Optional[str]: serial number, protocol version, number of boot-ups, hardware
+            str: serial number, protocol version, number of boot-ups, hardware
         version, software version, and compile date
         """
         command = 'RFINF'
@@ -351,42 +353,42 @@ class HEUv3:
     ########################### Read Settings Commands #################################
     ####################################################################################
 
-    def read_pump_speed_setting(self) -> Optional[str]:
+    def read_pump_speed_setting(self) -> str:
         """
         Read the pump speed setting
 
         Returns:
-            Optional[str]: pump speed setting
+            str: pump speed setting
         """
         command = 'RPSPD'
         return self.send_query(command)
 
-    def read_pump_IO_setting(self) -> Optional[str]:
+    def read_pump_IO_setting(self) -> str:
         """
         Read the pumps On/Off switch state
 
         Returns:
-            Optional[str]: state of On/Off switch (`"0"` for OFF, `"1"` for ON)
+            str: state of On/Off switch (`"0"` for OFF, `"1"` for ON)
         """
         command = 'RONOF'
         return self.send_query(command)
 
-    def read_max_temp_interlock_setting(self) -> Optional[str]:
+    def read_max_temp_interlock_setting(self) -> str:
         """
         Read the temperature interlock trip point setting.
 
         Returns:
-            Optional[str]: the temperature interlock set point
+            str: the temperature interlock set point
         """
         command = 'RMAXT'
         return self.send_query(command)
 
-    def read_min_flow_interlock_setting(self) -> Optional[str]:
+    def read_min_flow_interlock_setting(self) -> str:
         """
         Read the flow rate interlock trip point setting.
 
         Returns:
-            Optional[str]: the flow rate interlock set point
+            str: the flow rate interlock set point
         """
         command = 'RMINF'
         return self.send_query(command)
