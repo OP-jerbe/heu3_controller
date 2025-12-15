@@ -325,16 +325,6 @@ class HEUv3:
     ########################### Read Settings Commands #################################
     ####################################################################################
 
-    def read_pump_speed_setting(self) -> str:
-        """
-        Read the pump speed setting
-
-        Returns:
-            str: pump speed setting
-        """
-        command = 'RPSPD'
-        return self.send_query(command)
-
     def read_pump_IO_setting(self) -> str:
         """
         Read the pumps On/Off switch state
@@ -343,6 +333,17 @@ class HEUv3:
             str: state of On/Off switch (`"0"` for OFF, `"1"` for ON)
         """
         command = 'RONOF'
+        return self.send_query(command)
+
+    @property
+    def pump_speed(self) -> str:
+        """
+        GETTER: Read the pump speed setting
+
+        Returns:
+            str: pump speed setting
+        """
+        command = 'RPSPD'
         return self.send_query(command)
 
     @property
