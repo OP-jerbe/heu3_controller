@@ -176,34 +176,6 @@ class HEUv3:
         command = 'OFF'
         return self.send_query(command)  # returns "\n"
 
-    def set_max_temp_interlock(self, set_point: int) -> str:
-        """
-        Set the maximum temperature for the interlock in °C.
-
-        Args:
-            set_point (int): Maximum allowable temperature (5-65).
-
-        Returns:
-            str: Command string with newline.
-
-        Raises:
-            TypeError: If set_point is not an integer
-            ValueError: If the set point is outside valid range.
-        """
-        if not isinstance(set_point, int):
-            raise TypeError(
-                f'Argument of type {type(set_point)} not allowed. Must be of type int.'
-            )
-        if set_point < 5 or set_point > 65:
-            raise ValueError(
-                'Invalid maximum temperature interlock set point. Valid set point is between 5-65.'
-            )
-
-        set_point_str = str(set_point)
-        set_point_str = set_point_str.zfill(2)
-        command = f'SMAXT{set_point_str}'
-        return self.send_query(command)  # returns "\n"
-
     def set_min_flow_interlock(self, set_point: int | float) -> str:
         """
         Set the minimum flow rate for the interlock in L/min.
@@ -373,9 +345,10 @@ class HEUv3:
         command = 'RONOF'
         return self.send_query(command)
 
-    def read_max_temp_interlock_setting(self) -> str:
+    @property
+    def max_temp_interlock(self) -> str:
         """
-        Read the temperature interlock trip point setting.
+        GETTER: Reads the maximum temperature interlock trip point setting.
 
         Returns:
             str: the temperature interlock set point
@@ -383,7 +356,32 @@ class HEUv3:
         command = 'RMAXT'
         return self.send_query(command)
 
-    def read_min_flow_interlock_setting(self) -> str:
+    @max_temp_interlock.setter
+    def max_temp_interlock(self, value: float) -> None:
+        """
+        SETTER: Sets the maximum temperature interlock point.
+
+        Args:
+            value (int | float): Maximum allowable temperature (5-65 degrees C).
+        """
+        if not isinstance(value, (int | float)):
+            raise TypeError(
+                f'Argument of type {type(value).__name__} not allowed. Must be of type int.'
+            )
+
+        if not 5 <= value <= 65:
+            raise ValueError(
+                'Invalid maximum temperature interlock set point. Valid set point is between 5-65 C.'
+            )
+
+        value = int(value)
+        set_point_str = str(value)
+        set_point_str = set_point_str.zfill(2)
+        command = f'SMAXT{set_point_str}'
+        self.send_query(command)
+
+    @property
+    def min_flow_interlock(self) -> str:
         """
         Read the flow rate interlock trip point setting.
 
@@ -392,3 +390,25 @@ class HEUv3:
         """
         command = 'RMINF'
         return self.send_query(command)
+
+    @min_flow_interlock.setter
+    def min_flow_interlock(self, value: float) -> None:
+        """
+        SETTER: Sets the minimum flow rate interlock point.
+
+        Args:
+            value (int | float): Minimum allowable flow rate in liters per minute(0.5-9.99).
+        """
+        if not isinstance(value, (int | float)):
+            raise TypeError(
+                f'Argument of type {type(value).__name__} not allowed. Must be of type int or float.'
+            )
+        if not 0.5 <= value < 10:
+            raise ValueError(
+                'Invalid minimum flow rate set point. Valid set point is between 0.5 and 9.99.'
+            )
+
+        value = float(value)
+        set_point_str = f'{value:.2f}'
+        command = f'SMINF{set_point_str}'
+        self.send_query(command)
