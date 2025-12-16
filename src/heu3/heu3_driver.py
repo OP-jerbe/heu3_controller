@@ -11,7 +11,7 @@ import serial
 class HEUv3:
     """
     Class that implements the driver for the Oregon Physics Heat Exchange Unit v3.
-    The driver implements the following 23 commands:
+    The driver implements the following 25 commands:
 
     SET COMMANDS:
     * DE: Disable Echo
