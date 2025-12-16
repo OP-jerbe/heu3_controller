@@ -344,7 +344,73 @@ class HEUv3:
         return self._send_query(command)
 
     @property
-    def pumping_enabled(self) -> bool:
+    def serial_number(self) -> str:
+        """
+        GETTER: Read the unit serial number.
+
+        Returns:
+            str: The unit's serial number.
+        """
+        # The first number in the string is the unit's serial number
+        return self.factory_info.split(' ')[0]
+
+    @property
+    def protocol_version(self) -> str:
+        """
+        GETTER: Read the unit's protocol version.
+
+        Returns:
+            str: The units protocol version
+        """
+        # The second number in the string is the protocol version
+        return self.factory_info.split(' ')[1]
+
+    @property
+    def boot_ups(self) -> int:
+        """
+        GETTER: Read the number of times the unit has booted up.
+
+        Returns:
+            int: The number of times the unit has booted up.
+        """
+        # The third number in the string is the number of boot ups.
+        return int(self.factory_info.split(' ')[2])
+
+    @property
+    def hardware_version(self) -> str:
+        """
+        GETTER: Read the unit's hardware version.
+
+        Returns:
+            str: The unit's hardware version.
+        """
+        # The fourth number in the string is the hardware version.
+        return self.factory_info.split(' ')[3]
+
+    @property
+    def sofware_version(self) -> str:
+        """
+        GETTER: Read the unit's software version.
+
+        Returns:
+            str: The software version installed in the HEU
+        """
+        # The fifth number in the string is the software version.
+        return self.factory_info.split(' ')[4]
+
+    @property
+    def compile_date(self) -> str:
+        """
+        GETTER: Read the unit's compile date.
+
+        Returns:
+            str: The date that the software was compiled.
+        """
+        # The sixth (last) number in the string is the compile date.
+        return self.factory_info.split(' ')[5]
+
+    @property
+    def pumps_enabled(self) -> bool:
         """
         Read the pumps On/Off switch state.
         response of `"0"` indicates pumping is disabled.
