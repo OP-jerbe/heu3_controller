@@ -230,16 +230,19 @@ class HEUv3:
         return response == '0'
 
     @property
-    def pump_status(self) -> int:
+    def pump_status(self) -> tuple[int, int]:
         """
         Read the status bits for the pumps.
+        response is a string of two numbers e.g. '1,1', '2,1', ...
 
         Returns:
             int: `0` for bad, `1` for good, `2` for good but manually off.
         """
         command = 'RPUMP'
-        response = self._send_query(command)
-        return int(response)
+        response: list[str] = self._send_query(command).split(',')
+        pump1 = int(response[0])
+        pump2 = int(response[1])
+        return (pump1, pump2)
 
     @property
     def hour_meters(self) -> float:
