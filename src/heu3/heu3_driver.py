@@ -449,7 +449,7 @@ class HEUv3:
         self._send_query(command)
 
     @property
-    def max_temp_interlock(self) -> int:
+    def max_temp(self) -> int:
         """
         GETTER: Reads the maximum temperature interlock trip point setting.
 
@@ -460,8 +460,8 @@ class HEUv3:
         response = self._send_query(command)
         return int(response)
 
-    @max_temp_interlock.setter
-    def max_temp_interlock(self, value: float) -> None:
+    @max_temp.setter
+    def max_temp(self, value: float) -> None:
         """
         SETTER: Sets the maximum temperature interlock point.
 
@@ -489,7 +489,7 @@ class HEUv3:
         self._send_query(command)
 
     @property
-    def min_flow_interlock(self) -> float:
+    def min_flow(self) -> float:
         """
         Read the flow rate interlock trip point setting.
 
@@ -500,8 +500,8 @@ class HEUv3:
         response = self._send_query(command)
         return float(response)
 
-    @min_flow_interlock.setter
-    def min_flow_interlock(self, value: float) -> None:
+    @min_flow.setter
+    def min_flow(self, value: float) -> None:
         """
         SETTER: Sets the minimum flow rate interlock point.
 
