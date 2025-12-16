@@ -361,7 +361,7 @@ class HEUv3:
         return self.factory_info.split(' ')[3]
 
     @property
-    def sofware_version(self) -> str:
+    def software_version(self) -> str:
         """
         GETTER: Read the unit's software version.
 
