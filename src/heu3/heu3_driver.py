@@ -508,13 +508,13 @@ class HEUv3:
 
         Raises:
             TypeError: If `value` is not an integer or float.
-            ValueError: If `value` is outside valid range (0.5-9.99).
+            ValueError: If `value` is outside valid range (3.03-9.99).
         """
         if not isinstance(value, (int | float)):
             raise TypeError(
                 f'Argument of type {type(value).__name__} not allowed. Must be of type int or float.'
             )
-        if not 0.5 <= value < 10:
+        if not 3.03 <= value < 10:
             raise ValueError(
                 'Invalid minimum flow rate set point. Valid set point is between 0.5 and 9.99.'
             )
