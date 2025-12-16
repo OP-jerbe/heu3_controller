@@ -245,16 +245,52 @@ class HEUv3:
         return (pump1, pump2)
 
     @property
-    def hour_meters(self) -> float:
+    def hour_meters(self) -> str:
         """
         GETTER: Read the number of hours the unit has been power on, and the number of hours each pump has been run.
 
         Returns:
-            float: unit-on hours, pump1 hours, pump2 hours in the form `"nnnnnn nnnnnn nnnnnn"`.
+            str: unit-on hours, pump1 hours, pump2 hours in the form `"nnnnnn nnnnnn nnnnnn"`.
         """
         command = 'RHOUR'
         response = self._send_query(command)
-        return float(response)
+        return response
+
+    @property
+    def unit_hours(self) -> int:
+        """
+        GETTER: Read the number of hours that the unit has been powered on.
+
+        Returns:
+            int: Number of hours the unit has been powered on.
+        """
+        # The first string is the unit-on hours.
+        hours = int(self.hour_meters.split(' ')[0])
+        return hours
+
+    @property
+    def pump1_hours(self) -> int:
+        """
+        GETTER: Read the number of hours pump 1 has been running.
+
+        Returns:
+            int: Number of hours that pump 1 has been running.
+        """
+        # The second string is the pump1-on hours
+        hours = int(self.hour_meters.split(' ')[1])
+        return hours
+
+    @property
+    def pump2_hours(self) -> int:
+        """
+        GETTER: Read the number of hours pump 2 has been running.
+
+        Returns:
+            int: Number of hours that pump 2 has been running.
+        """
+        # The second string is the pump1-on hours
+        hours = int(self.hour_meters.split(' ')[2])
+        return hours
 
     @property
     def power_dissipated(self) -> int:
