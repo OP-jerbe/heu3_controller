@@ -46,7 +46,7 @@ class HEUv3:
     def __init__(self, com_port: Optional[str] = None) -> None:
         self._lock = Lock()
         self._com_port = com_port
-        self._term_char = '\n'
+        self._term_char = '\r'
         self.serial_port = None
 
     def _send_query(self, query: str) -> str:
