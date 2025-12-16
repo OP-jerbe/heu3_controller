@@ -307,7 +307,7 @@ class HEUv3:
         return int(response)
 
     @property
-    def is_leak_detected(self) -> bool:
+    def leak_detected(self) -> bool:
         """
         GETTER: Read the leak detector bit.
         response of `"0"` indicates no leak detected.
