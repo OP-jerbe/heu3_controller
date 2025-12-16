@@ -219,15 +219,15 @@ class HEUv3:
     def is_interlocked(self) -> bool:
         """
         GETTER: Reads the interlock status bit.
+        A response of `"0"` indicates the interlock circuit is open.
         A response of `"1"` indicates the interlock is satisfied.
-        A response of `"2"` indicates the interlock circuit is open.
 
         Returns:
             bool: `True` if the interlock is open (not satisfied). `False` if the interlock is circuit is closed (satisfied).
         """
         command = 'RINTR'
         response = self._send_query(command)
-        return response == '2'
+        return response == '0'
 
     @property
     def pump_status(self) -> int:
