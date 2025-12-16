@@ -76,12 +76,10 @@ class HEUv3:
             try:
                 self.serial_port.reset_input_buffer()
                 self.serial_port.write(query.encode())
-                raw_response: bytes = self.serial_port.read_until(
+                raw_response: str = self.serial_port.read_until(
                     self._term_char.encode()
-                )
-                formatted_response: str = (
-                    raw_response.decode().replace(query, '').strip()
-                )
+                ).decode()
+                formatted_response: str = raw_response.replace(query, '').strip()
                 return formatted_response
 
             except Exception as e:
