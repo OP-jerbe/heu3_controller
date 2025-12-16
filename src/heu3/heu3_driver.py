@@ -152,33 +152,6 @@ class HEUv3:
         command = 'DP'
         self._send_query(command)
 
-    def enable_pumps(self) -> None:
-        """
-        Turn the pumps on.
-        """
-        command = 'ON'
-        self._send_query(command)
-
-    def disable_pumps(self) -> None:
-        """
-        Turn the pumps off.
-
-        Returns:
-            str: Command string with newline.
-        """
-        command = 'OFF'
-        self._send_query(command)
-
-    def select_pumps(self, pump: int) -> None:
-        """
-        Select which pumps to activate.
-
-        Args:
-            pump (int): `0` for both pumps, `1` for pump1, `2` for pump2.
-        """
-        command = f'SPONO{pump}'
-        self._send_query(command)
-
     @property
     def inlet_temp(self) -> float:
         """
@@ -422,6 +395,17 @@ class HEUv3:
         command = 'RONOF'
         response = self._send_query(command)
         return response == '1'
+
+    @pumps_enabled.setter
+    def pumps_enabled(self, enable: bool) -> None:
+        """
+        SETTER: Sets the enabled state of the pumps
+        """
+        if enable:
+            command = 'ON'
+        else:
+            command = 'OFF'
+        self._send_query(command)
 
     @property
     def pump_speed(self) -> int:
