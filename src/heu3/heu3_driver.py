@@ -1,5 +1,14 @@
 """
-This module contains the driver for the Oregon Physics Heat Exchange Unit v3
+heu3_driver.py
+
+Description: This driver contains HEUv3 class which can control the
+             Oregon Physics Heat Exchange Unit v3.
+
+Built with Python 3.13.3
+
+Author: Joshua Erbe
+Company: Oregon Physics, LLC.
+Version 1.0.0
 """
 
 from threading import Lock
