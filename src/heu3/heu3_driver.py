@@ -40,7 +40,7 @@ class HEUv3:
     * RONOF: Read pumps on/off setting [b == `0` (off), `1` (on)]
     * RMAXT: Read maximum interlock temperature setting in degrees C [nn]
     * RMINF: Read minimum interlock flow rate setting in liters per minute [n.nn]
-    * !: Ping the heat exchange unit [`WAZOO!`]
+    * !: Ping the heat exchange unit [`WAZOO`]
     """
 
     def __init__(self, com_port: Optional[str] = None) -> None:
