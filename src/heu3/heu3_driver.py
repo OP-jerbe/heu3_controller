@@ -223,7 +223,7 @@ class HEUv3:
         GETTER: Read the number of hours the unit has been power on, and the number of hours each pump has been run.
 
         Returns:
-            str: unit-on hours, pump1 hours, pump2 hours in the form `"nnnnnn nnnnnn nnnnnn"`.
+            str: unit-on hours, pump1 hours, pump2 hours in the form `"nnnnnn  nnnnnn  nnnnnn"`.
         """
         command = 'RHOUR'
         response = self._send_query(command)
@@ -238,7 +238,7 @@ class HEUv3:
             int: Number of hours the unit has been powered on.
         """
         # The first string is the unit-on hours.
-        hours = int(self.hour_meters.split(' ')[0])
+        hours = int(self.hour_meters.split('  ')[0])
         return hours
 
     @property
@@ -250,7 +250,7 @@ class HEUv3:
             int: Number of hours that pump 1 has been running.
         """
         # The second string is the pump1-on hours
-        hours = int(self.hour_meters.split(' ')[1])
+        hours = int(self.hour_meters.split('  ')[1])
         return hours
 
     @property
@@ -262,7 +262,7 @@ class HEUv3:
             int: Number of hours that pump 2 has been running.
         """
         # The second string is the pump1-on hours
-        hours = int(self.hour_meters.split(' ')[2])
+        hours = int(self.hour_meters.split('  ')[2])
         return hours
 
     @property
