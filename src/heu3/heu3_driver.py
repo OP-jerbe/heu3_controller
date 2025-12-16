@@ -3,10 +3,9 @@ This module contains the driver for the Oregon Physics Heat Exchange Unit v3
 """
 
 from threading import Lock
-from typing import Optional, cast
+from typing import Optional
 
-import pyvisa
-from pyvisa.resources import MessageBasedResource
+import serial
 
 
 class HEUv3:
@@ -44,45 +43,69 @@ class HEUv3:
     * !: Ping the heat exchange unit [`WAZOO!`]
     """
 
-    def __init__(
-        self,
-        resource_name: Optional[str] = None,
-        instrument: Optional[MessageBasedResource] = None,
-    ) -> None:
-        self._rm = pyvisa.ResourceManager('@py')
-        self._instrument: Optional[MessageBasedResource] = instrument
-        if self._instrument is None and resource_name is not None:
-            self._instrument = cast(
-                MessageBasedResource, self._rm.open_resource(resource_name)
-            )
+    def __init__(self, com_port: Optional[str] = None) -> None:
         self._lock = Lock()
+        self._com_port = com_port
+        self._term_char = '\n'
+        self.serial_port = None
 
-    def _send_query(self, command: str) -> str:
+    def _send_query(self, query: str) -> str:
         """
-        Send a command to the instrument and read the response.
+        Sends a query command to the HEU, reads the response.
 
         Args:
-            command (str): Command string to send to the HEUv3.
+            query (str): The query command string to send.
+                The carriage return termination character is appended automatically.
 
         Returns:
-            str: Response from the instrument
+            str: The decoded and stripped string response received from the instrument.
         """
-        if not self._instrument:
+        if not self.serial_port or not self.serial_port.is_open:
             raise RuntimeError(
-                'Attempted to communicate with HEUv3, but no instrument is connected.'
+                'Attempted to communicate with HEU, but no instrument is connected.'
             )
-
-        if not command.endswith('\n'):
-            command += '\n'
+        if not query.endswith(self._term_char):
+            query += self._term_char
 
         with self._lock:
             try:
-                raw_response = self._instrument.query(command)
-                cleaned_response = raw_response.replace(command, '').strip()
-                # print(f'Command: "{command}"\nResponse: "{response}"')
-                return cleaned_response
+                self.serial_port.reset_input_buffer()
+                self.serial_port.write(query.encode())
+                raw_response: bytes = self.serial_port.read_until(
+                    self._term_char.encode()
+                )
+                formatted_response: str = (
+                    raw_response.decode().replace(query, '').strip()
+                )
+                return formatted_response
+
             except Exception as e:
-                raise ConnectionError(f'Serial Communication Error: {e}')
+                print(f'Unexpected Error sending query: {e}')
+                raise
+
+    def open_connection(
+        self, port: str, baudrate: int = 38400, timeout: float = 1.0
+    ) -> serial.Serial | None:
+        """
+        Establishes a serial connection to the instrument at the specified COM port.
+
+        Args:
+            port (str): The COM port where the HEU is connected (e.g., 'COM3' or '/dev/ttyUSB0').
+                The port name is automatically converted to uppercase.
+            baudrate (int): The serial communication baud rate in bits per second. Defaults to 38400.
+            timeout (float): The read and write timeout in seconds. Defaults to 1.0.
+        """
+        try:
+            self.serial_port = serial.Serial(
+                port=port.upper(),
+                baudrate=baudrate,
+                timeout=timeout,
+                write_timeout=timeout,
+            )
+
+        except Exception as e:
+            print(f'Failed to make a serial connection to {port}.\n\n{str(e)}')
+            self.serial_port = None
 
     ####################################################################################
     ################################ HEU Commands ######################################
@@ -149,9 +172,6 @@ class HEUv3:
 
         Args:
             pump (int): `0` for both pumps, `1` for pump1, `2` for pump2.
-
-        Returns:
-            str: Command string with newline.
         """
         command = f'SPONO{pump}'
         self._send_query(command)
