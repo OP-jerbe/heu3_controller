@@ -22,7 +22,7 @@ class HEUv3:
     * ON: Turn on pumps
     * OFF: Turn off pumps
     * SMAXTnn: Set maximum temperature for interlock [nn == `05`-`65`]
-    * SMINFn.nn: Set minimum flow rate for interlock [n.nn == `0.50`-`9.99`]
+    * SMINFn.nn: Set minimum flow rate for interlock [n.nn == `3.03`-`9.99`]
     * SPONOn: Activate pumps [n == `0` (both pumps), `1` (pump1), `2` (pump2)]
 
     READ COMMANDS:
