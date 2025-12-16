@@ -49,6 +49,11 @@ class HEUv3:
         self._term_char = '\r'
         self.serial_port = None
 
+        if self._com_port:
+            self.open_connection(self._com_port)
+            self.disable_echo()
+            self.ping()
+
     def _send_query(self, query: str) -> str:
         """
         Sends a query command to the HEU, reads the response.
