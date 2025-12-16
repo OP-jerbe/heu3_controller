@@ -49,15 +49,15 @@ class HEUv3:
         resource_name: Optional[str] = None,
         instrument: Optional[MessageBasedResource] = None,
     ) -> None:
-        self.rm = pyvisa.ResourceManager('@py')
-        self.instrument: Optional[MessageBasedResource] = instrument
-        if self.instrument is None and resource_name is not None:
-            self.instrument = cast(
-                MessageBasedResource, self.rm.open_resource(resource_name)
+        self._rm = pyvisa.ResourceManager('@py')
+        self._instrument: Optional[MessageBasedResource] = instrument
+        if self._instrument is None and resource_name is not None:
+            self._instrument = cast(
+                MessageBasedResource, self._rm.open_resource(resource_name)
             )
-        self.lock = Lock()
+        self._lock = Lock()
 
-    def send_query(self, command: str) -> str:
+    def _send_query(self, command: str) -> str:
         """
         Send a command to the instrument and read the response.
 
@@ -67,7 +67,7 @@ class HEUv3:
         Returns:
             str: Response from the instrument
         """
-        if not self.instrument:
+        if not self._instrument:
             raise RuntimeError(
                 'Attempted to communicate with HEUv3, but no instrument is connected.'
             )
@@ -75,98 +75,65 @@ class HEUv3:
         if not command.endswith('\n'):
             command += '\n'
 
-        with self.lock:
+        with self._lock:
             try:
-                response = self.instrument.query(command)
+                raw_response = self._instrument.query(command)
+                cleaned_response = raw_response.replace(command, '').strip()
+                # print(f'Command: "{command}"\nResponse: "{response}"')
+                return cleaned_response
             except Exception as e:
                 raise ConnectionError(f'Serial Communication Error: {e}')
 
-            print(f'Command: "{command}"\nResponse: "{response}"')
-            return response
-
     ####################################################################################
-    ################################ Set Commands ######################################
+    ################################ HEU Commands ######################################
     ####################################################################################
 
-    def disable_echo(self) -> str:
+    def ping(self) -> str:
+        """
+        Sends a simple ping command to the HEU to check for communication and response.
+
+        Returns:
+            str: The response from the instrument, which is expected to be "WAZOO!".
+        """
+        command = '!'
+        return self._send_query(command)
+
+    def disable_echo(self) -> None:
         """
         Disable echo.
-
-        Returns:
-            str: Command string with newline.
         """
         command = 'DE'
-        return self.send_query(command)  # returns "DE\n"
+        self._send_query(command)
 
-    def enable_echo(self) -> str:
+    def enable_echo(self) -> None:
         """
         Enable echo (default state).
-
-        Returns:
-            str: Command string with newline.
         """
         command = 'EE'
-        return self.send_query(command)  # returns "EE\n"
+        self._send_query(command)
 
-    def enable_panel(self) -> str:
+    def enable_panel(self) -> None:
         """
         Enable the touchscreen panel (default state).
-
-        Returns:
-            str: Command string with newline.
         """
         command = 'EP'
-        return self.send_query(command)  # returns "EP\n"
+        self._send_query(command)
 
-    def disable_panel(self) -> str:
+    def disable_panel(self) -> None:
         """
         Disable the touchscreen panel (only pump on/off buttons work).
-
-        Returns:
-            str: Command string with newline.
         """
         command = 'DP'
-        return self.send_query(command)  # returns "DP\n"
+        self._send_query(command)
 
-    def set_pump_speed(self, set_point: int) -> str:
-        """
-        Set the pump speed.
-
-        Args:
-            set_point (int): Pump speed setting (0-999).
-
-        Returns:
-            str: Command string with newline.
-
-        Raises:
-            TypeError: If set_point is not an integer
-            ValueError: If set_point is outside valid range.
-        """
-        if not isinstance(set_point, int):
-            raise TypeError(
-                f'Argument of type {type(set_point)} not allowed. Must be of type int.'
-            )
-        if set_point < 0 or set_point > 999:
-            raise ValueError('Invalid speed setting. Setting must be between 0 and 999')
-
-        speed_str = str(set_point)  # convert int to str
-        speed_str = speed_str.zfill(
-            3
-        )  # add leading zeros so string is always 3 chars long
-        command = f'SPS{speed_str}'
-        return self.send_query(command)  # returns "\n"
-
-    def enable_pumps(self) -> str:
+    def enable_pumps(self) -> None:
         """
         Turn the pumps on.
-
-        Returns:
-            str: Command string with newline.
         """
         command = 'ON'
-        return self.send_query(command)  # returns "\n"
+        self._send_query(command)
 
-    def disable_pumps(self) -> str:
+    def disable_pumps(self) -> None:
         """
         Turn the pumps off.
 
@@ -174,188 +141,210 @@ class HEUv3:
             str: Command string with newline.
         """
         command = 'OFF'
-        return self.send_query(command)  # returns "\n"
+        self._send_query(command)
 
-    def set_min_flow_interlock(self, set_point: int | float) -> str:
-        """
-        Set the minimum flow rate for the interlock in L/min.
-
-        Args:
-            set_point (int | float): Minimum allowable flow rate (0.5-9.99).
-
-        Returns:
-            str: Command string with newline.
-
-        Raises:
-            ValueError: If the set point is outside valid range.
-        """
-        if set_point < 0.5 or set_point > 10:
-            raise ValueError(
-                'Invalid minimum flow rate set point. Valid set point is between 0.5 and 9.99.'
-            )
-
-        if isinstance(set_point, int):
-            set_point = float(set_point)
-
-        set_point_str = f'{set_point:.2f}'
-        command = f'SMINF{set_point_str}'
-        return self.send_query(command)  # returns "\n"
-
-    def select_pumps(self, pump: int) -> str:
+    def select_pumps(self, pump: int) -> None:
         """
         Select which pumps to activate.
 
         Args:
-            pump (int): 0 for both pumps, 1 for pump1, 2 for pump2.
+            pump (int): `0` for both pumps, `1` for pump1, `2` for pump2.
 
         Returns:
             str: Command string with newline.
         """
         command = f'SPONO{pump}'
-        return self.send_query(command)  # returns "{pump}\n"
+        self._send_query(command)
 
-    ####################################################################################
-    ############################ Read State Commands ###################################
-    ####################################################################################
-
-    def read_inlet_temp(self) -> str:
+    @property
+    def inlet_temp(self) -> float:
         """
-        Read the inlet temperature of the Galden HT-270.
+        GETTER: Read the inlet temperature of the Galden HT-270.
 
         Returns:
-            str: Inlet temperature of Galden in °C
+            float: Inlet temperature of Galden in °C.
         """
         command = 'RINTE'
-        return self.send_query(command)
+        response = self._send_query(command)
+        return float(response)
 
-    def read_outlet_temp(self) -> str:
+    @property
+    def outlet_temp(self) -> float:
         """
-        Read the outlet temperature of the Galden HT-270.
+        GETTER: Read the outlet temperature of the Galden HT-270.
 
         Returns:
-            str: Outlet temperature of Galden in °C
+            float: Outlet temperature of Galden in °C.
         """
         command = 'ROUTT'
-        return self.send_query(command)
+        response = self._send_query(command)
+        return float(response)
 
-    def read_flow_rate(self) -> str:
+    @property
+    def flow_rate(self) -> float:
         """
-        Read the flow rate of the Galden in liters per minute.
+        GETTER: Read the flow rate of the Galden in liters per minute.
 
         Returns:
-            str: Flow rate of Galden as measured by internal flow meter
+            float: Flow rate of Galden as measured by internal flow meter in liters per minute.
         """
         command = 'RFLOW'
-        return self.send_query(command)
+        response = self._send_query(command)
+        return float(response)
 
-    def read_interlock_status(self) -> str:
+    @property
+    def is_interlocked(self) -> bool:
         """
-        Read the interlock status bit.
+        GETTER: Reads the interlock status bit.
+        A response of `"1"` indicates the interlock is satisfied.
+        A response of `"2"` indicates the interlock circuit is open.
 
         Returns:
-            str: `"1"` for on, good, `"2"` for off
+            bool: `True` if the interlock is open (not satisfied). `False` if the interlock is circuit is closed (satisfied).
         """
         command = 'RINTR'
-        return self.send_query(command)
+        response = self._send_query(command)
+        return response == '2'
 
-    def read_pump_status(self) -> str:
+    @property
+    def pump_status(self) -> int:
         """
         Read the status bits for the pumps.
 
         Returns:
-            str: `"0"` for bad, `"1"` for good, `"2"` for good but manually off
+            int: `0` for bad, `1` for good, `2` for good but manually off.
         """
         command = 'RPUMP'
-        return self.send_query(command)
+        response = self._send_query(command)
+        return int(response)
 
-    def read_hour_meters(self) -> str:
+    @property
+    def hour_meters(self) -> float:
         """
-        Read the number of hours the unit has been power on, and the number of hours each pump has been run.
+        GETTER: Read the number of hours the unit has been power on, and the number of hours each pump has been run.
 
         Returns:
-            str: unit-on hours, pump1 hours, pump2 hours in the form `"nnnnnn nnnnnn nnnnnn"`
+            float: unit-on hours, pump1 hours, pump2 hours in the form `"nnnnnn nnnnnn nnnnnn"`.
         """
         command = 'RHOUR'
-        return self.send_query(command)
+        response = self._send_query(command)
+        return float(response)
 
-    def read_power_dissipated(self) -> str:
+    @property
+    def power_dissipated(self) -> int:
         """
         Read the current amount of heat being dissipated/exchanged in Watts calculated
         from flow rate and inlet/outlet temperature difference. Only valid when
         Galden HT-270 is the coolant.
 
         Returns:
-            str: the power exchanged in the unit
+            int: the power exchanged in the unit.
         """
         command = 'RPOWR'
-        return self.send_query(command)
+        response = self._send_query(command)
+        return int(response)
 
-    def read_leak_detect(self) -> str:
+    @property
+    def is_leak_detected(self) -> bool:
         """
-        Read the leak detector bit.
+        GETTER: Read the leak detector bit.
+        response of `"0"` indicates no leak detected.
+        response of `"1"` indicates there is a leak detected.
 
         Returns:
-            str: `"0"` for no leak, `"1"` for leak
+            bool: `True` if the leak detector sees liquid. `False` if the leak detector is dry.
         """
         command = 'RLEAK'
-        return self.send_query(command)
+        response = self._send_query(command)
+        return response == '1'
 
-    def read_datetime(self) -> str:
+    @property
+    def datetime(self) -> str:
         """
-        Read the real time clock used in logs.
+        GETTER: Read the real time clock used in logs.
 
         Returns:
-            str: the current month, day, year, hour:minute:second
+            str: the current month, day, year, hour:minute:second.
         """
         command = 'RDATI'
-        return self.send_query(command)
+        return self._send_query(command)
 
-    def read_factory_info(self) -> str:
+    @property
+    def factory_info(self) -> str:
         """
-        Read the HEU build information
+        GETTER: Read the HEU build information.
 
         Returns:
             str: serial number, protocol version, number of boot-ups, hardware
-        version, software version, and compile date
+        version, software version, and compile date.
         """
         command = 'RFINF'
-        return self.send_query(command)
-
-    ####################################################################################
-    ########################### Read Settings Commands #################################
-    ####################################################################################
-
-    def read_pump_IO_setting(self) -> str:
-        """
-        Read the pumps On/Off switch state
-
-        Returns:
-            str: state of On/Off switch (`"0"` for OFF, `"1"` for ON)
-        """
-        command = 'RONOF'
-        return self.send_query(command)
+        return self._send_query(command)
 
     @property
-    def pump_speed(self) -> str:
+    def pumping_enabled(self) -> bool:
+        """
+        Read the pumps On/Off switch state.
+        response of `"0"` indicates pumping is disabled.
+        response of `"1"` indicates pumping is enabled.
+
+        Returns:
+            bool: `True` if ON/OFF button is ON. `False` if ON/OFF button is OFF.
+        """
+        command = 'RONOF'
+        response = self._send_query(command)
+        return response == '1'
+
+    @property
+    def pump_speed(self) -> int:
         """
         GETTER: Read the pump speed setting
 
         Returns:
-            str: pump speed setting
+            str: The pump speed setting.
         """
         command = 'RPSPD'
-        return self.send_query(command)
+        response = self._send_query(command)
+        return int(response)
+
+    @pump_speed.setter
+    def pump_speed(self, value: int) -> None:
+        """
+        Set the pump speed.
+
+        Args:
+            value (int): Pump speed setting (0-999).
+
+        Raises:
+            TypeError: If `value` is not an integer.
+            ValueError: If `value` is outside valid range (0-999).
+        """
+        if not isinstance(value, int):
+            raise TypeError(
+                f'Argument of type {type(value).__name__} not allowed. Must be of type int.'
+            )
+        if not 0 <= value <= 999:
+            raise ValueError(
+                'Invalid speed setting. Setting must be between 0 and 999.'
+            )
+
+        speed_str = str(value)
+        # add leading zeros so string is always 3 chars long
+        speed_str = speed_str.zfill(3)
+        command = f'SPS{speed_str}'
+        self._send_query(command)
 
     @property
-    def max_temp_interlock(self) -> str:
+    def max_temp_interlock(self) -> int:
         """
         GETTER: Reads the maximum temperature interlock trip point setting.
 
         Returns:
-            str: the temperature interlock set point
+            int: the temperature interlock set point.
         """
         command = 'RMAXT'
-        return self.send_query(command)
+        response = self._send_query(command)
+        return int(response)
 
     @max_temp_interlock.setter
     def max_temp_interlock(self, value: float) -> None:
@@ -364,6 +353,10 @@ class HEUv3:
 
         Args:
             value (int | float): Maximum allowable temperature (5-65 degrees C).
+
+        Raises:
+            TypeError: If `value` is not an integer or float.
+            ValueError: If `value` is outside valid range (5-65).
         """
         if not isinstance(value, (int | float)):
             raise TypeError(
@@ -379,18 +372,19 @@ class HEUv3:
         set_point_str = str(value)
         set_point_str = set_point_str.zfill(2)
         command = f'SMAXT{set_point_str}'
-        self.send_query(command)
+        self._send_query(command)
 
     @property
-    def min_flow_interlock(self) -> str:
+    def min_flow_interlock(self) -> float:
         """
         Read the flow rate interlock trip point setting.
 
         Returns:
-            str: the flow rate interlock set point
+            float: the flow rate interlock set point.
         """
         command = 'RMINF'
-        return self.send_query(command)
+        response = self._send_query(command)
+        return float(response)
 
     @min_flow_interlock.setter
     def min_flow_interlock(self, value: float) -> None:
@@ -399,6 +393,10 @@ class HEUv3:
 
         Args:
             value (int | float): Minimum allowable flow rate in liters per minute(0.5-9.99).
+
+        Raises:
+            TypeError: If `value` is not an integer or float.
+            ValueError: If `value` is outside valid range (0.5-9.99).
         """
         if not isinstance(value, (int | float)):
             raise TypeError(
@@ -412,4 +410,4 @@ class HEUv3:
         value = float(value)
         set_point_str = f'{value:.2f}'
         command = f'SMINF{set_point_str}'
-        self.send_query(command)
+        self._send_query(command)
