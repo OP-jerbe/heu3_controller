@@ -380,7 +380,11 @@ class HEUv3:
             str: The date that the software was compiled.
         """
         # The sixth (last) number in the string is the compile date.
-        return self.factory_info.split(' ')[5]
+        response = self.factory_info.split(' ')
+        month = response[5]
+        day = response[6]
+        year = response[7]
+        return f'{month}. {day}, {year}'
 
     @property
     def pumps_enabled(self) -> bool:
