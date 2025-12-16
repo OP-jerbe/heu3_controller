@@ -119,7 +119,7 @@ class HEUv3:
         Sends a simple ping command to the HEU to check for communication and response.
 
         Returns:
-            str: The response from the instrument, which is expected to be "WAZOO!".
+            str: The response from the instrument, which is expected to be "WAZOO".
         """
         command = '!'
         return self._send_query(command)
