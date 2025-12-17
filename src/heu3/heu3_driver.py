@@ -514,7 +514,7 @@ class HEUv3:
         SETTER: Sets the minimum flow rate interlock point.
 
         Args:
-            value (int | float): Minimum allowable flow rate in liters per minute(0.5-9.99).
+            value (int | float): Minimum allowable flow rate in liters per minute(3.03-9.99).
 
         Raises:
             TypeError: If `value` is not an integer or float.
@@ -526,7 +526,7 @@ class HEUv3:
             )
         if not 3.03 <= value < 10:
             raise ValueError(
-                'Invalid minimum flow rate set point. Valid set point is between 0.5 and 9.99.'
+                'Invalid minimum flow rate set point. Valid set point is between 3.03 and 9.99.'
             )
 
         value = float(value)
