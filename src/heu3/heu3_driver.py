@@ -411,6 +411,8 @@ class HEUv3:
         """
         SETTER: Sets the enabled state of the pumps
         """
+        if not isinstance(enable, bool):
+            raise TypeError(f'Expected bool but got {type(enable).__name__}.')
         if enable:
             command = 'ON'
         else:
