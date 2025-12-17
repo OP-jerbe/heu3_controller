@@ -20,7 +20,7 @@ import serial
 class HEUv3:
     """
     Class that implements the driver for the Oregon Physics Heat Exchange Unit v3.
-    The driver implements the following 25 commands:
+    The driver implements the following 24 commands:
 
     SET COMMANDS:
     * DE: Disable Echo
@@ -32,7 +32,6 @@ class HEUv3:
     * OFF: Turn off pumps
     * SMAXTnn: Set maximum temperature for interlock [nn == `05`-`65`]
     * SMINFn.nn: Set minimum flow rate for interlock [n.nn == `3.03`-`9.99`]
-    * SPONOn: Activate pumps [n == `0` (both pumps), `1` (pump1), `2` (pump2)]
 
     READ COMMANDS:
     * RINTE: Read dielectric inlet temperature in degrees C [nn.n]
