@@ -493,9 +493,8 @@ class HEUv3:
             )
 
         value = int(value)
-        set_point_str = str(value)
-        set_point_str = set_point_str.zfill(2)
-        command = f'SMAXT{set_point_str}'
+        set_point = str(value).zfill(2)
+        command = f'SMAXT{set_point}'
         self._send_query(command)
 
     @property
