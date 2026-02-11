@@ -395,7 +395,7 @@ class HEUv3:
     @property
     def pumps_enabled(self) -> bool:
         """
-        Read the pumps On/Off switch state.
+        GETTER: Read the pumps On/Off switch state.
         response of `"0"` indicates pumping is disabled.
         response of `"1"` indicates pumping is enabled.
 
@@ -410,6 +410,9 @@ class HEUv3:
     def pumps_enabled(self, enable: bool) -> None:
         """
         SETTER: Sets the enabled state of the pumps
+
+        Args:
+            enable (bool): `True` to turn on pumps. `False` to shut off pumps.
         """
         if not isinstance(enable, bool):
             raise TypeError(f'Expected bool but got {type(enable).__name__}.')
@@ -434,7 +437,7 @@ class HEUv3:
     @pump_speed.setter
     def pump_speed(self, value: int) -> None:
         """
-        Set the pump speed.
+        SETTER: Set the pump speed.
 
         Args:
             value (int): Pump speed setting (0-999).
@@ -500,7 +503,7 @@ class HEUv3:
     @property
     def min_flow(self) -> float:
         """
-        Read the flow rate interlock trip point setting.
+        GETTER: Read the flow rate interlock trip point setting.
 
         Returns:
             float: the flow rate interlock set point.
@@ -515,7 +518,7 @@ class HEUv3:
         SETTER: Sets the minimum flow rate interlock point.
 
         Args:
-            value (int | float): Minimum allowable flow rate in liters per minute(3.03-9.99).
+            value (int | float): Minimum allowable flow rate in liters per minute (3.03-9.99).
 
         Raises:
             TypeError: If `value` is not an integer or float.
